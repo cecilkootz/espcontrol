@@ -97,6 +97,7 @@ docker run --rm -v "${PWD}:/config" ghcr.io/esphome/esphome:2026.4.5 compile /co
 docker run --rm -v "${PWD}:/config" ghcr.io/esphome/esphome:2026.4.5 compile /config/builds/guition-esp32-p4-jc8012p4a1.factory.yaml
 docker run --rm -v "${PWD}:/config" ghcr.io/esphome/esphome:2026.4.5 compile /config/builds/esp32-p4-86.factory.yaml
 docker run --rm -v "${PWD}:/config" ghcr.io/esphome/esphome:2026.4.5 compile /config/builds/guition-esp32-s3-4848s040.factory.yaml
+docker run --rm -v "${PWD}:/config" ghcr.io/esphome/esphome:2026.4.5 compile /config/builds/waveshare-esp32-s3-touch-lcd-7.factory.yaml
 ```
 
 If a generated check fails, run the generator it names, review the source and generated diff together, then rerun `npm run check:all`.

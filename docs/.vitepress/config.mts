@@ -86,6 +86,14 @@ const screenProducts: Record<string, Record<string, string>> = {
     resolution: '1024 x 600',
     processor: 'ESP32-P4',
   },
+  'screens/waveshare-s3-touch-lcd-7.md': {
+    name: 'Waveshare ESP32-S3-Touch-LCD-7',
+    brand: 'Waveshare',
+    model: 'ESP32-S3-Touch-LCD-7',
+    size: '7 inches',
+    resolution: '800 x 480',
+    processor: 'ESP32-S3',
+  },
   'screens/jc4880p443.md': {
     name: 'Guition JC4880P443',
     model: 'JC4880P443',
@@ -155,7 +163,7 @@ const faqItems = [
   {
     question: 'How Many Cards Can I Have?',
     answer:
-      'The home screen supports 20 cards on JC8012P4A1, 15 on JC1060P470, 6 on JC4880P443, and 9 on 4848S040 or the ESP32-P4 86 Panel, with more available through subpages.',
+      'The home screen supports 20 cards on JC8012P4A1, 15 on JC1060P470 or Waveshare ESP32-S3-Touch-LCD-7, 6 on JC4880P443, and 9 on 4848S040 or the ESP32-P4 86 Panel, with more available through subpages.',
   },
   {
     question: 'What Is a Subpage?',
@@ -170,7 +178,7 @@ const faqItems = [
   {
     question: 'Which Panels Are Supported?',
     answer:
-      'EspControl supports the Guition JC8012P4A1, JC1060P470, JC4880P443, 4848S040, and ESP32-P4 86 Panel touchscreens.',
+      'EspControl supports the Guition JC8012P4A1, JC1060P470, JC4880P443, 4848S040, ESP32-P4 86 Panel, and Waveshare ESP32-S3-Touch-LCD-7 touchscreens.',
   },
   {
     question: 'Does the Panel Work with Other Smart Home Platforms?',
@@ -385,6 +393,7 @@ export default defineConfig({
         items: [
           { text: '10.1-inch JC8012P4A1', link: '/screens/jc8012p4a1' },
           { text: '7-inch JC1060P470', link: '/screens/jc1060p470' },
+          { text: '7-inch Waveshare S3 Touch LCD 7', link: '/screens/waveshare-s3-touch-lcd-7' },
           { text: '4.3-inch JC4880P443', link: '/screens/jc4880p443' },
           { text: '4-inch ESP32-P4 86 Panel', link: '/screens/p4-86' },
           { text: '4-inch 4848S040', link: '/screens/4848s040' },

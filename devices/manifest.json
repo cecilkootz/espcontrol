@@ -340,6 +340,92 @@
         }
       }
     },
+    "waveshare-esp32-s3-touch-lcd-7": {
+      "slots": 15,
+      "layout": {
+        "cols": 5,
+        "rows": 3,
+        "firmwareGrid": "3x5",
+        "portraitCols": 3
+      },
+      "rotation": {
+        "enabled": true,
+        "options": [
+          "0",
+          "90",
+          "180",
+          "270"
+        ],
+        "displayOffset": 180,
+        "rotateWidthCompensation": true
+      },
+      "web": {
+        "dragMode": "swap",
+        "dragAnimation": true,
+        "screen": {
+          "width": "100%",
+          "aspect": "800/480"
+        },
+        "portrait": {
+          "cols": 3,
+          "rows": 5,
+          "screen": {
+            "width": "60%",
+            "aspect": "480/800"
+          }
+        },
+        "topbar": {
+          "height": 4.5,
+          "padding": "0.75cqw",
+          "fontSize": 2.25
+        },
+        "grid": {
+          "top": 5.2,
+          "compactTop": 0.63,
+          "left": 0.63,
+          "right": 0.63,
+          "bottom": 0.63,
+          "gap": 1,
+          "fr": "1fr"
+        },
+        "btn": {
+          "radius": 1,
+          "padding": 1.5,
+          "iconSize": 5.5,
+          "labelSize": 2.5,
+          "labelLines": 2,
+          "labelLinesDouble": 3
+        },
+        "emptyCell": {
+          "radius": 1
+        },
+        "sensorBadge": {
+          "top": 1,
+          "right": 1,
+          "fontSize": 1.9
+        },
+        "subpageBadge": {
+          "bottom": 1,
+          "right": 1,
+          "fontSize": 2.5
+        }
+      },
+      "firmware": {
+        "fonts": {
+          "icon": "icon_font_ws7",
+          "sensor": "statistics_font_ws7",
+          "largeSensor": "statistics_font_ws7_xl",
+          "mediaTitle": "media_title_font_ws7",
+          "volumeNumber": "volume_modal_number_font_ws7",
+          "volumeLabel": "volume_modal_label_font_ws7"
+        },
+        "display": {
+          "colorCorrection": false,
+          "wrapTallLabels": true,
+          "volumeWidthCompensationPercent": 95
+        }
+      }
+    },
     "guition-esp32-s3-4848s040": {
       "slots": 9,
       "layout": {

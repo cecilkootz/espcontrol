@@ -94,6 +94,18 @@ const devices = [
     shape: 'landscape'
   },
   {
+    slug: 'waveshare-esp32-s3-touch-lcd-7',
+    name: 'Waveshare S3 Touch LCD 7',
+    size: '7 in',
+    resolution: '800 x 480',
+    orientation: 'Landscape',
+    slots: 15,
+    cols: 5,
+    rows: 3,
+    aspect: '800 / 480',
+    shape: 'landscape'
+  },
+  {
     slug: 'guition-esp32-p4-jc4880p443',
     name: 'JC4880P443',
     size: '4.3 in',

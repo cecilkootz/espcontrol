@@ -15,6 +15,8 @@ constexpr const char *NETWORK_ICON_WIFI_3 = "\U000F0925";
 constexpr const char *NETWORK_ICON_WIFI_4 = "\U000F0928";
 constexpr const char *NETWORK_ICON_ETHERNET = "\U000F0200";
 
+#define ESPCONTROL_NETWORK_STATUS_PANEL_COLOR 1
+
 struct NetworkStatusModalUi {
   lv_obj_t *overlay = nullptr;
   lv_obj_t *panel = nullptr;
@@ -130,7 +132,7 @@ inline void network_status_open_modal(const std::string &device_name,
                                       const std::string &firmware_version,
                                       const lv_font_t *text_font,
                                       const lv_font_t *icon_font,
-                                      const std::string &panel_color_hex) {
+                                      const std::string &panel_color_hex = "212121") {
   media_volume_hide_modal();
   climate_control_hide_modal();
   switch_confirmation_hide_modal();

@@ -1,0 +1,95 @@
+# =============================================================================
+# FONTS (DEVICE OVERRIDE) - Font variants for the 800x480 display
+# =============================================================================
+# Supplements the common fonts with device-specific variants for the main UI.
+# These _ws7 variants are referenced by the device theme and LVGL config.
+# =============================================================================
+
+font:
+  # Main page icons sized for a 5x3 grid on an 800x480 landscape panel.
+  - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
+    id: icon_font_ws7
+    size: 44
+    bpp: 4
+    glyphs: !include ../../../common/assets/icon_glyphs.yaml
+
+  # Main page: large statistics / sensor values
+  - file: "gfonts://Roboto@Medium"
+    id: statistics_font_ws7
+    size: 50
+    bpp: 4
+    glyphs:
+      - "0123456789.-°/%"
+      - ":"
+
+  # Main page: large-card sensor values (2.5x the regular sensor value font)
+  - file: "gfonts://Roboto"
+    id: statistics_font_ws7_xl
+    size: 125
+    bpp: 4
+    glyphs:
+      - "0123456789.-°/%"
+      - ":"
+
+  # Media now-playing titles
+  - file: "gfonts://Roboto@Medium"
+    id: media_title_font_ws7
+    size: 43
+    bpp: 4
+    glyphs: !include ../../../common/assets/text_glyphs.yaml
+    extras:
+      - file: "gfonts://Heebo"
+        glyphs: !include ../../../common/assets/hebrew_glyphs.yaml
+
+  # Button labels
+  - file: "gfonts://Roboto@Medium"
+    id: label_font_ws7
+    size: 24
+    bpp: 4
+    glyphs: !include ../../../common/assets/text_glyphs.yaml
+    extras:
+      - file: "gfonts://Heebo"
+        glyphs: !include ../../../common/assets/hebrew_glyphs.yaml
+
+  # Top bar clock and temperature
+  - file: "gfonts://Roboto@Medium"
+    id: clockbar_font_ws7
+    size: 20
+    bpp: 4
+    extras:
+      - file: "gfonts://Heebo"
+        glyphs: !include ../../../common/assets/hebrew_glyphs.yaml
+
+  # Top bar network status icon
+  - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
+    id: network_status_font_ws7
+    size: 20
+    bpp: 4
+    glyphs: !include ../../../common/assets/network_status_glyphs.yaml
+
+  # Volume/climate modal: large numeric value
+  - file: "gfonts://Roboto"
+    id: volume_modal_number_font_ws7
+    size: 100
+    bpp: 4
+    glyphs:
+      - "0123456789.-°Of"
+
+  # Volume/climate modal labels
+  - file: "gfonts://Roboto@Medium"
+    id: volume_modal_label_font_ws7
+    size: 24
+    bpp: 4
+    glyphs:
+      - " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz/°"
+
+  # Setup screen icons
+  - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
+    id: icon_font_setup_ws7
+    size: 61
+    bpp: 4
+    glyphs:
+      - "\U000F05A9"  # mdi-wifi
+      - "\U000F0200"  # mdi-ethernet
+      - "\U000F0493"  # mdi-cog
+      - "\U000F07D0"  # mdi-home-assistant

@@ -1,0 +1,288 @@
+# =============================================================================
+# DEVICE - Waveshare ESP32-S3-Touch-LCD-7 hardware definition
+# =============================================================================
+# Pin assignments, peripherals, and platform config for the 7" 800x480 panel.
+# Includes the ESP32-S3 SoC, MIPI RGB display, CH422G I/O expander, GT911
+# capacitive touchscreen, and backlight enable control.
+# =============================================================================
+
+substitutions:
+  espcontrol_component_url: "https://github.com/cecilkootz/espcontrol"
+  espcontrol_component_ref: "main"
+
+# ---------------------------------------------------------------------------
+# ESP32-S3 platform (8MB flash, ESP-IDF framework)
+# ---------------------------------------------------------------------------
+esp32:
+  board: esp32-s3-devkitc-1
+  flash_size: 8MB
+  cpu_frequency: 240MHZ
+  framework:
+    type: esp-idf
+    version: 5.5.2
+    source: https://github.com/pioarduino/esp-idf/releases/download/v5.5.2/esp-idf-v5.5.2.tar.xz
+    platform_version: 55.03.37
+    sdkconfig_options:
+      # The S3 display stack leaves little internal RAM for HTTPS OTA checks.
+      # Allocate mbedTLS buffers from PSRAM so firmware downloads can connect.
+      CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y"
+      # Keep WiFi startup inside the internal-RAM budget after the RGB display
+      # and LVGL buffers are initialized.
+      CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM: "8"
+      CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP: "y"
+
+# ---------------------------------------------------------------------------
+# External component
+# ---------------------------------------------------------------------------
+external_components:
+  - source:
+      type: git
+      url: ${espcontrol_component_url}
+      ref: ${espcontrol_component_ref}
+      path: components
+    components: [espcontrol, web_server_idf]
+    refresh: 0s
+
+espcontrol:
+
+# ---------------------------------------------------------------------------
+# ESPHome core (device name from substitutions)
+# ---------------------------------------------------------------------------
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  on_boot:
+    - priority: 800
+      then:
+        - lambda: |-
+            auto reason = esp_reset_reason();
+            if (reason == ESP_RST_SW) {
+              esp_ota_img_states_t ota_state;
+              const esp_partition_t *running = esp_ota_get_running_partition();
+              if (running != nullptr &&
+                  esp_ota_get_state_partition(running, &ota_state) == ESP_OK &&
+                  ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
+                ESP_LOGI("s3_reset", "Delaying deep-sleep reset until OTA image is marked valid");
+                id(post_ota_hardware_reset).execute();
+                return;
+              }
+            }
+            if (reason == ESP_RST_USB || reason == ESP_RST_SW) {
+              esp_sleep_enable_timer_wakeup(100000);
+              esp_deep_sleep_start();
+            }
+    - priority: -100
+      then:
+        - script.execute: apply_screen_rotation
+
+# ---------------------------------------------------------------------------
+# PSRAM (video frame buffer memory)
+# ---------------------------------------------------------------------------
+psram:
+  mode: octal
+  speed: 80MHz
+
+# ---------------------------------------------------------------------------
+# OTA updates (ESPHome native + HTTP-based)
+# ---------------------------------------------------------------------------
+ota:
+  - platform: esphome
+    on_begin:
+      then:
+        - light.turn_off: display_backlight
+    on_end:
+      then:
+        - lambda: |-
+            esp_sleep_enable_timer_wakeup(100000);
+            esp_deep_sleep_start();
+  - platform: http_request
+
+# ---------------------------------------------------------------------------
+# Shared infrastructure (API, logging, web server, restart button)
+# ---------------------------------------------------------------------------
+packages:
+  core_infra: !include ../../../common/device/core_infra.yaml
+
+# The S3 RGB panel runs close to the internal RAM limit once the display,
+# LVGL, web UI, and API are all active. Keep the native API connection pool
+# small so Home Assistant can connect without reserving memory for unused
+# concurrent clients.
+api:
+  listen_backlog: 2
+  max_connections: 2
+  max_send_queue: 4
+
+wifi:
+  use_psram: true
+
+# ---------------------------------------------------------------------------
+# I2C bus and CH422G expander
+# ---------------------------------------------------------------------------
+i2c:
+  - id: bus_a
+    sda: GPIO08
+    scl: GPIO09
+    frequency: 400kHz
+    scan: true
+
+ch422g:
+  - id: ch422g_hub
+
+# ---------------------------------------------------------------------------
+# Backlight (CH422G enable pin behind a dimmable software output)
+# ---------------------------------------------------------------------------
+output:
+  - platform: gpio
+    id: lcd_backlight_enable
+    pin:
+      ch422g: ch422g_hub
+      number: 2
+      mode:
+        output: true
+
+  # The stock board exposes only the CH422G backlight enable pin. A template
+  # float output preserves the shared dimming API; brightness levels are mapped
+  # to on/off unless the board is hardware-modified for PWM later.
+  - platform: template
+    id: gpio_backlight_pwm
+    type: float
+    write_action:
+      - if:
+          condition:
+            lambda: 'return state > 0.0f;'
+          then:
+            - output.turn_on: lcd_backlight_enable
+          else:
+            - output.turn_off: lcd_backlight_enable
+
+light:
+  - platform: monochromatic
+    output: gpio_backlight_pwm
+    name: Display Backlight
+    icon: mdi:lightbulb-on
+    id: display_backlight
+    restore_mode: RESTORE_DEFAULT_ON
+    default_transition_length: 0s
+    gamma_correct: 1.0
+    on_turn_on:
+      then:
+        - if:
+            condition:
+              lambda: |-
+                return id(screen_schedule_asleep) ||
+                       (id(schedule_enabled).state && !panel_time_or_fallback(id(panel_time).now(), id(homeassistant_time).now()).is_valid());
+            then:
+              - script.execute: backlight_force_display_off
+            else:
+              - if:
+                  condition:
+                    lambda: 'return id(screensaver_display_off_active);'
+                  then:
+                    - script.execute: screensaver_wake
+
+touchscreen:
+  - platform: gt911
+    id: my_touchscreen
+    display: my_display
+    i2c_id: bus_a
+    reset_pin:
+      ch422g: ch422g_hub
+      number: 1
+      mode: OUTPUT
+    interrupt_pin: GPIO4
+    on_touch:
+      - script.execute: screensaver_wake
+
+# ---------------------------------------------------------------------------
+# Display (7" 800x480 MIPI RGB panel)
+# ---------------------------------------------------------------------------
+display:
+  - platform: mipi_rgb
+    id: my_display
+    model: ESP32-S3-TOUCH-LCD-7-800X480
+    dimensions:
+      width: 800
+      height: 480
+    color_order: RGB
+    # Keep the model's LCD power enable pin under the display driver, but leave
+    # EXIO2 for the user-facing backlight entity above.
+    enable_pin:
+      - ch422g: ch422g_hub
+        number: 6
+        mode:
+          output: true
+    # Start WiFi before the RGB panel allocates its frame buffers; otherwise the
+    # WiFi driver can fail to claim enough internal RX buffers on fresh boots.
+    setup_priority: 240
+    update_interval: never
+    auto_clear_enabled: false
+
+# ---------------------------------------------------------------------------
+# LVGL base (display binding, must be before any page definitions)
+# ---------------------------------------------------------------------------
+lvgl:
+  id: main_lvgl
+  # Keep LVGL after WiFi and after the display driver.
+  setup_priority: 230
+  buffer_size: 25%
+  displays: my_display
+  rotation: 180
+  byte_order: little_endian
+  touchscreens:
+    - touchscreen_id: my_touchscreen
+      long_press_time: 3s
+
+script:
+  - id: post_ota_hardware_reset
+    mode: single
+    then:
+      # Safe Mode marks the new OTA image valid after 60s. Wait a little
+      # longer, then perform the hardware-reset workaround for this S3 panel.
+      - delay: 75s
+      - lambda: |-
+          ESP_LOGI("s3_reset", "Performing delayed post-OTA deep-sleep reset");
+          esp_sleep_enable_timer_wakeup(100000);
+          esp_deep_sleep_start();
+
+  - id: apply_screen_rotation
+    then:
+      - if:
+          condition:
+            lambda: 'return id(screen_rotation_select).current_option() == "90";'
+          then:
+            - lvgl.display.set_rotation: 270
+          else:
+            - if:
+                condition:
+                  lambda: 'return id(screen_rotation_select).current_option() == "180";'
+                then:
+                  - lvgl.display.set_rotation: 0
+                else:
+                  - if:
+                      condition:
+                        lambda: 'return id(screen_rotation_select).current_option() == "270";'
+                      then:
+                        - lvgl.display.set_rotation: 90
+                      else:
+                        - lvgl.display.set_rotation: 180
+
+select:
+  - platform: template
+    name: "Screen: Rotation"
+    internal: true
+    disabled_by_default: true
+    id: screen_rotation_select
+    entity_category: config
+    icon: "mdi:screen-rotation"
+    optimistic: true
+    restore_value: true
+    initial_option: "180"
+    options:
+      - "0"
+      - "90"
+      - "180"
+      - "270"
+    on_value:
+      then:
+        - script.execute: apply_screen_rotation
+        - script.execute: refresh_button_grid

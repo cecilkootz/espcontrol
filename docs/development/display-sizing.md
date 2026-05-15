@@ -59,6 +59,7 @@ Native font definitions live in YAML. The device-specific files add sizes that d
 | Device | Short side | Font file |
 |---|---:|---|
 | `guition-esp32-s3-4848s040` | `480` | `devices/guition-esp32-s3-4848s040/device/fonts.yaml` |
+| `waveshare-esp32-s3-touch-lcd-7` | `480` | `devices/waveshare-esp32-s3-touch-lcd-7/device/fonts.yaml` |
 | `guition-esp32-p4-jc4880p443` | `480` | `devices/guition-esp32-p4-jc4880p443/device/fonts.yaml` |
 | `guition-esp32-p4-jc1060p470` | `600` | `devices/guition-esp32-p4-jc1060p470/device/fonts.yaml` |
 | `esp32-p4-86` | `720` | `devices/esp32-p4-86/device/fonts.yaml` |
